@@ -1,24 +1,22 @@
+// in hlhutu/majang1/Majang1-88bd5fd17289239cf56fb2501ccd5445313091f1/assets/script/controller/GameLogicController.ts
 import {_decorator, Component} from 'cc';
 import {MajangData} from "db://assets/script/model/MajangData";
 import {GameViewController} from "db://assets/script/controller/GameViewController";
 
 const { ccclass, property, requireComponent } = _decorator;
 
-/**
- * 游戏逻辑控制器，入口
- */
 @ccclass('GameLogicController')
 @requireComponent(GameViewController)
 export class GameLogicController extends Component {
 
-    private gameView: GameViewController = new GameViewController();
+    private gameView: GameViewController;
 
-    _deck: MajangData[] = [];// 牌山
-    _hand: MajangData[] = [];// 手牌
-    _newCard: MajangData = null;// 新牌，右手第一张
-    _table: MajangData[] = [];// 桌上
+    _deck: MajangData[] = [];
+    _hand: MajangData[] = [];
+    _newCard: MajangData | null = null;
+    _table: MajangData[] = [];
 
-    _canPlay: boolean = false;// 是否可以打出手牌
+    _canPlay: boolean = false;
 
     onLoad() {
         this.gameView = this.getComponent(GameViewController);
@@ -26,86 +24,109 @@ export class GameLogicController extends Component {
 
     onEnable() {
         console.log('Game Start')
-        // 开始游戏流程
         this.startGame();
     }
 
-    /**
-     * 开始一局新游戏
-     */
     public startGame() {
-        // 清空视图
         this.gameView.clear();
-        // 洗牌
         this.shuffleDeck();
-        // 发牌
         this.dealHand(13);
-        // 抽出下一张牌
-        this.claimCard()
-        this._canPlay = true// 此时可以打出一张手牌
+        this.claimCard();
+        this._canPlay = true;
     }
 
     /**
-     * 洗牌：使用 Fisher-Yates 算法
+     * 新增：处理打牌逻辑
+     * @param playedPai 要打出的牌
      */
+    public playCard(playedPai: MajangData) {
+        if (!this._canPlay) {
+            console.log("现在不是出牌阶段！");
+            return;
+        }
+        console.log(`打出牌: ${playedPai.key}`);
+        this._canPlay = false; // 防止快速连续点击
+
+        let cardFound = false;
+        // 检查打出的是否是新抽的牌
+        if (this._newCard && this._newCard.id === playedPai.id) {
+            this._table.push(this._newCard);
+            this._newCard = null;
+            cardFound = true;
+        } else {
+            // 否则，从手牌中找到并移除这张牌
+            const index = this._hand.findIndex(p => p.id === playedPai.id);
+            if (index > -1) {
+                this._table.push(...this._hand.splice(index, 1));
+                cardFound = true;
+            }
+        }
+
+        if (!cardFound) {
+            console.error("错误：试图打出一张不存在的牌！");
+            this._canPlay = true;
+            return;
+        }
+
+        // 如果有新牌，则并入手牌
+        if (this._newCard) {
+            this._hand.push(this._newCard);
+            this._newCard = null;
+        }
+
+        // 重绘桌面和手牌
+        this.gameView.drawTableArea();
+        this.handSort();
+        this.gameView.drawHandArea();
+
+        // 延迟一小段时间再摸牌，让玩家看清出牌过程
+        this.scheduleOnce(() => {
+            try {
+                this.claimCard();
+                this._canPlay = true; // 允许下一次出牌
+            } catch (e) {
+                console.log("游戏结束，牌库已摸完！");
+                // 在这里可以处理游戏结束的逻辑
+            }
+        }, 0.5); // 延迟0.5秒
+    }
+
     private shuffleDeck() {
-        // 从原始牌库复制一份作为本局要用的牌
         this._deck = [...MajangData.MajangLib];
-        console.log('开始洗牌...');
         let i = this._deck.length;
         while (i > 0) {
             const j = Math.floor(Math.random() * i);
             i--;
-            // 交换元素
             [this._deck[i], this._deck[j]] = [this._deck[j], this._deck[i]];
         }
-        console.log('洗牌完成！');
     }
 
-    /**
-     * 发指定数量的牌到手牌区
-     * @param count 要发的牌的数量
-     */
     private dealHand(count: number) {
-        console.log(`开始发牌，共 ${count} 张...`);
         for (let i = 0; i < count; i++) {
-            // 检查牌堆里是否还有牌，增强健壮性
-            if (this._deck.length === 0) {
-                console.log('错误：牌堆已空，无法继续发牌！');
-                break;
-            }
-            // 从牌堆顶部抽一张牌
+            if (this._deck.length === 0) break;
             const pai = this._deck.pop()!;
-            // 加入手牌
             this._hand.push(pai);
         }
-        console.log('发牌完成！');
-        // 在这里可以接着处理排序手牌等逻辑
-        this.handSort()// 排序
-        this.gameView.drawHandArea();// 重绘手牌区域
+        this.handSort();
+        this.gameView.drawHandArea();
     }
 
-    // 手牌排序
     private handSort() {
         this._hand.sort((a, b) => {
-            return a.id - b.id;
+            // 首先按花色排序，然后按点数排序
+            if (a.color !== b.color) {
+                const colorOrder = ['W', 'T', 'S', 'F', 'D'];
+                return colorOrder.indexOf(a.color) - colorOrder.indexOf(b.color);
+            }
+            return a.point - b.point;
         });
     }
 
-    // 抽一张牌到新牌区
     private claimCard() {
-        if(this._newCard!=null) {// 如果新牌已经有了，就把他放入手牌
-            this._hand.push(this._newCard);
-            this._newCard = null;
-        }
-        // 检查牌堆里是否还有牌，增强健壮性
-        if (this._deck.length === 0) {// 牌库为空
+        if (this._deck.length === 0) {
             throw new Error("deck is empty");
         }
-        // 从牌堆顶部抽一张牌，放入新牌区
-        this._newCard = this._deck.pop()!
-        // 排序并重绘手牌区
-        this.handSort()
+        this._newCard = this._deck.pop()!;
         this.gameView.drawHandArea();
     }
 }
