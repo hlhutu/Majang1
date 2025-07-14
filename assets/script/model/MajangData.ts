@@ -40,6 +40,25 @@ export class MajangData {
                 MajangData.buildMajangData(id++, Global.COLOR_Suo, i),
             );
         }
+        // 初始化风牌，东南西北
+        for (let i = 1; i <= 4; i++) {
+            MajangData.MajangLib.push(
+                MajangData.buildMajangData(id++, Global.COLOR_Feng, i),
+                MajangData.buildMajangData(id++, Global.COLOR_Feng, i),
+                MajangData.buildMajangData(id++, Global.COLOR_Feng, i),
+                MajangData.buildMajangData(id++, Global.COLOR_Feng, i),
+            );
+        }
+        // 初始化三元，中发白
+        for (let i = 1; i <= 3; i++) {
+            MajangData.MajangLib.push(
+                MajangData.buildMajangData(id++, Global.COLOR_SanYuan, i),
+                MajangData.buildMajangData(id++, Global.COLOR_SanYuan, i),
+                MajangData.buildMajangData(id++, Global.COLOR_SanYuan, i),
+                MajangData.buildMajangData(id++, Global.COLOR_SanYuan, i),
+            );
+        }
+
         console.log('init MajangData successfully', MajangData.MajangLib.values());
     }
     private static buildMajangData(id:number, color:string, i:number): MajangData {
