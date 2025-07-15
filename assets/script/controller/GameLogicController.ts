@@ -3,6 +3,7 @@ import {_decorator, Component} from 'cc';
 import {MajangData} from "db://assets/script/model/MajangData";
 import {GameViewController} from "db://assets/script/controller/GameViewController";
 import {YakuCalculator} from "db://assets/script/controller/YakuCalculator";
+import {StatusBarViewController} from "db://assets/script/controller/StatusBarManager";
 
 const { ccclass, property, requireComponent } = _decorator;
 
@@ -10,7 +11,8 @@ const { ccclass, property, requireComponent } = _decorator;
 @requireComponent(GameViewController)
 export class GameLogicController extends Component {
 
-    private gameView: GameViewController;
+    private mainView: GameViewController; // 手牌区/桌子区
+    private statucBarView: StatusBarViewController;// 状态区
 
     _deck: MajangData[] = [];
     _deckCount: number = 0;
@@ -21,7 +23,8 @@ export class GameLogicController extends Component {
     _canPlay: boolean = false;
 
     onLoad() {
-        this.gameView = this.getComponent(GameViewController);
+        this.mainView = this.getComponent(GameViewController);
+        this.statucBarView = this.getComponent(StatusBarViewController);
     }
 
     onEnable() {
@@ -30,7 +33,7 @@ export class GameLogicController extends Component {
     }
 
     public startGame() {
-        this.gameView.clear();
+        this.mainView.clear();// 清空手牌/桌子
         this.shuffleDeck();
         this.dealHand(13);
         this.claimCard();
@@ -77,12 +80,9 @@ export class GameLogicController extends Component {
         }
 
         // 重绘桌面和手牌
-        this.gameView.drawTableArea();
+        this.mainView.drawTableArea();
         this.handSort();
-        this.gameView.drawHandArea();
-
-        // 在延迟摸牌之前，先检查一次听牌状态
-        this.checkYaku();
+        this.mainView.drawHandArea();
 
         // 延迟一小段时间再摸牌，让玩家看清出牌过程
         this.scheduleOnce(() => {
@@ -99,12 +99,12 @@ export class GameLogicController extends Component {
     private shuffleDeck() {
         this._deck = [...MajangData.MajangLib];
         this._deckCount = this._deck.length;
-        let i = this._deck.length;
-        while (i > 0) {
-            const j = Math.floor(Math.random() * i);
-            i--;
-            [this._deck[i], this._deck[j]] = [this._deck[j], this._deck[i]];
-        }
+        // let i = this._deck.length;
+        // while (i > 0) {
+        //     const j = Math.floor(Math.random() * i);
+        //     i--;
+        //     [this._deck[i], this._deck[j]] = [this._deck[j], this._deck[i]];
+        // }
     }
 
     private dealHand(count: number) {
@@ -114,7 +114,7 @@ export class GameLogicController extends Component {
             this._hand.push(pai);
         }
         this.handSort();
-        this.gameView.drawHandArea();
+        this.mainView.drawHandArea();
     }
 
     private handSort() {
@@ -133,7 +133,8 @@ export class GameLogicController extends Component {
             throw new Error("deck is empty");
         }
         this._newCard = this._deck.pop()!;
-        this.gameView.drawHandArea();
+        this.mainView.drawHandArea();
+        this.statucBarView.updateDeckDisplay();// 抽牌后刷新剩余牌数
         this.checkYaku(); // 摸牌后检查，是否和牌
     }
 
@@ -142,12 +143,12 @@ export class GameLogicController extends Component {
      */
     private checkYaku() {
         if (!this._newCard) {
-            this.gameView.updateYakuDisplay([]); // 没有新牌（即手牌非14张）时，清空役种显示
+            this.statucBarView.updateYakuDisplay([]); // 没有新牌（即手牌非14张）时，清空役种显示
             return;
         }
 
         const fullHand = [...this._hand, this._newCard];
         const yakuResults = YakuCalculator.calculate(fullHand);
-        this.gameView.updateYakuDisplay(yakuResults);
+        this.statucBarView.updateYakuDisplay(yakuResults);
     }
 }

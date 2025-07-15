@@ -3,6 +3,7 @@ import { _decorator, Component, Node, Prefab, instantiate, Vec3, Color, Sprite, 
 import {MajangData} from "db://assets/script/model/MajangData";
 import {MajangTile} from "db://assets/script/controller/MajangTile";
 import { GameLogicController} from "db://assets/script/controller/GameLogicController";
+import {YakuResult} from "db://assets/script/controller/YakuCalculator";
 const { ccclass, property, requireComponent } = _decorator;
 
 @ccclass('GameViewController')
@@ -24,20 +25,8 @@ export class GameViewController extends Component {
     @property({ type: Node, tooltip: '抽牌区域' })
     newCardArea: Node = null!;
 
-    @property({ type: Label, tooltip: '用于显示役种的Label' })
-    yakuLabel: Label = null!;
-
-    @property({ type: Button, tooltip: '和牌按钮' })
-    winButton: Button = null!;
-
-    @property({ type: Label, tooltip: '显示剩余牌堆的Label' })
-    deckLabel: Label = null!;
-
     onLoad() {
         this.gameLogic = this.getComponent(GameLogicController);
-        // 游戏开始时先隐藏
-        this.yakuLabel.string = "";
-        this.winButton.node.active = false;
     }
 
     clear() {
@@ -79,14 +68,11 @@ export class GameViewController extends Component {
         if (this.gameLogic._newCard != null) {
             this.addPaiTo(this.gameLogic._newCard, this.newCardArea);
         }
-        // 刷新显示
-        this.updateDeckDisplay()
     }
 
     clearHandArea() {
         this.handArea.removeAllChildren();
         this.newCardArea.removeAllChildren();
-        this.deckLabel.string = "牌山：0/0";
     }
 
     drawTableArea() {
@@ -128,32 +114,5 @@ export class GameViewController extends Component {
                 sprite.color = Color.WHITE; // 恢复原色
             }
         });
-    }
-
-    /**
-     * 新增：更新役种显示和和牌按钮状态
-     * @param yakuResults 役种计算结果数组
-     */
-    public updateYakuDisplay(yakuResults: { name: string, han: number }[]) {
-        if (yakuResults.length > 0) {
-            const totalHan = yakuResults.reduce((sum, yaku) => sum + yaku.han, 0);
-            const yakuNames = yakuResults.map(yaku => yaku.name).join(' ');
-
-            this.yakuLabel.string = `${yakuNames} ${totalHan}翻`;
-            this.winButton.node.active = true;
-            this.yakuLabel.color = Color.GREEN; // 设置颜色为绿色
-        } else {
-            this.yakuLabel.string = "无役";
-            this.winButton.node.active = false;
-            this.yakuLabel.color = new Color('#C0C0C0'); // 设置颜色为灰色
-        }
-    }
-
-    /**
-     * 刷新剩余牌堆显示
-     */
-    public updateDeckDisplay() {
-        console.log(this.gameLogic._deck.length+"/"+this.gameLogic._deckCount);
-        this.deckLabel.string = "牌山："+this.gameLogic._deck.length+"/"+this.gameLogic._deckCount;
     }
 }
