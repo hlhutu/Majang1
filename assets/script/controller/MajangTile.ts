@@ -14,7 +14,7 @@ export class MajangTile extends Component {
     @property({ type: Label, tooltip: '用于显示麻将Key的Label节点' })
     public keyLabel: Label = null;
 
-    public isInteractive: boolean = true;
+    public isInteractive: boolean = false;// 是否可响应变化，默认不可
     majangData: MajangData;
     private originalPosition: Vec3 = null;
     private isHovering: boolean = false;
@@ -87,10 +87,10 @@ export class MajangTile extends Component {
         if (this.originalPosition === null) {
             this.originalPosition = this.node.position.clone();
         }
-        const targetPos = new Vec3(this.originalPosition.x, this.originalPosition.y + 20, this.originalPosition.z);
-        tween(this.node)
-            .to(0.1, { position: targetPos })
-            .start();
+        // const targetPos = new Vec3(this.originalPosition.x, this.originalPosition.y + 20, this.originalPosition.z);
+        // tween(this.node)
+        //     .to(0.1, { position: targetPos })
+        //     .start();
     }
 
     private onMouseLeave(event: EventMouse) {

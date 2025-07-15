@@ -25,6 +25,12 @@ export class GameViewController extends Component {
     @property({ type: Node, tooltip: '抽牌区域' })
     newCardArea: Node = null!;
 
+    @property({ type: Node, tooltip: '交互区域' })
+    operationArea: Node = null!;
+
+    @property({ type: Prefab, tooltip: '杠的预制体' })
+    agangPrefab: Prefab = null!;
+
     onLoad() {
         this.gameLogic = this.getComponent(GameLogicController);
     }
@@ -35,15 +41,15 @@ export class GameViewController extends Component {
         this.allTileNodes = []; // 清空列表
     }
 
-    private addPaiTo(pai: MajangData, target: Node, scale: number = 1.0) {
+    private addPaiTo(pai: MajangData, target: Node, scale: number = 1.0, isClone = false) {
         const newTileNode = instantiate(this.majangPrefab);
         newTileNode.setScale(new Vec3(scale, scale, scale));
 
         const tileComponent = newTileNode.getComponent(MajangTile);
         if (tileComponent) {
             tileComponent.init(pai);
-            if (target === this.tableArea) {
-                tileComponent.isInteractive = false;
+            if (target === this.handArea) {// 只有手牌区的麻将可以交互
+                tileComponent.isInteractive = true;
             }
         } else {
             console.log(`错误：麻将Prefab上没有找到 MajangTile 脚本！`);
@@ -114,5 +120,16 @@ export class GameViewController extends Component {
                 sprite.color = Color.WHITE; // 恢复原色
             }
         });
+    }
+
+    // 刷新新产生的杠区
+    public drawNewGangArea(mjs: MajangData[]) {
+        this.operationArea.removeAllChildren()
+        mjs.forEach(m => {
+            const p = instantiate(this.agangPrefab);
+            const majangNode = p.getChildByName("Majang");
+            this.addPaiTo(m, majangNode, 0.5, true);
+            this.operationArea.addChild(p);
+        })
     }
 }
