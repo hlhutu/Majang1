@@ -2,6 +2,7 @@
 import {_decorator, Component} from 'cc';
 import {MajangData} from "db://assets/script/model/MajangData";
 import {GameViewController} from "db://assets/script/controller/GameViewController";
+import {YakuCalculator} from "db://assets/script/controller/YakuCalculator";
 
 const { ccclass, property, requireComponent } = _decorator;
 
@@ -12,6 +13,7 @@ export class GameLogicController extends Component {
     private gameView: GameViewController;
 
     _deck: MajangData[] = [];
+    _deckCount: number = 0;
     _hand: MajangData[] = [];
     _newCard: MajangData | null = null;
     _table: MajangData[] = [];
@@ -79,6 +81,9 @@ export class GameLogicController extends Component {
         this.handSort();
         this.gameView.drawHandArea();
 
+        // 在延迟摸牌之前，先检查一次听牌状态
+        this.checkYaku();
+
         // 延迟一小段时间再摸牌，让玩家看清出牌过程
         this.scheduleOnce(() => {
             try {
@@ -93,6 +98,7 @@ export class GameLogicController extends Component {
 
     private shuffleDeck() {
         this._deck = [...MajangData.MajangLib];
+        this._deckCount = this._deck.length;
         let i = this._deck.length;
         while (i > 0) {
             const j = Math.floor(Math.random() * i);
@@ -128,5 +134,20 @@ export class GameLogicController extends Component {
         }
         this._newCard = this._deck.pop()!;
         this.gameView.drawHandArea();
+        this.checkYaku(); // 摸牌后检查，是否和牌
+    }
+
+    /**
+     * 新增：检查当前手牌的役种并更新显示
+     */
+    private checkYaku() {
+        if (!this._newCard) {
+            this.gameView.updateYakuDisplay([]); // 没有新牌（即手牌非14张）时，清空役种显示
+            return;
+        }
+
+        const fullHand = [...this._hand, this._newCard];
+        const yakuResults = YakuCalculator.calculate(fullHand);
+        this.gameView.updateYakuDisplay(yakuResults);
     }
 }
