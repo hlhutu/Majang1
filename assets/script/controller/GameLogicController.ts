@@ -141,7 +141,7 @@ export class GameLogicController extends Component {
         this.mainView.drawHandArea();
         this.statucBarView.updateDeckDisplay();// 抽牌后刷新剩余牌数
         this.checkGangs([...this._hand, this._newCard]);// 抽牌后判断是否可以开杠
-        // this.checkYaku(); // 摸牌后检查，是否和牌
+        this.checkYaku(); // 摸牌后检查役种
     }
 
     // 验证是否有杠，会把所有可以杠的牌显示出来
@@ -198,12 +198,9 @@ export class GameLogicController extends Component {
 
     // 新增：检查当前手牌的役种并更新显示
     private checkYaku() {
-        if (!this._newCard) {
-            this.statucBarView.updateYakuDisplay([]); // 没有新牌（即手牌非14张）时，清空役种显示
-            return;
-        }
         const fullHand = [...this._hand, this._newCard];
         const yakuResults = YakuCalculator.calculate(fullHand);
+        //
         this.statucBarView.updateYakuDisplay(yakuResults);
     }
 }
