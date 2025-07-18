@@ -4,6 +4,7 @@ import {MajangData} from "db://assets/script/model/MajangData";
 import {MajangTile} from "db://assets/script/controller/MajangTile";
 import { GameLogicController} from "db://assets/script/controller/GameLogicController";
 import {YakuResult} from "db://assets/script/controller/YakuCalculator";
+import {AGangController} from "db://assets/script/controller/AGang/AGangController";
 const { ccclass, property, requireComponent } = _decorator;
 
 @ccclass('GameViewController')
@@ -15,6 +16,9 @@ export class GameViewController extends Component {
 
     @property({ type: Prefab, tooltip: '麻将牌的预制体' })
     majangPrefab: Prefab = null!;
+
+    @property({ type: Prefab, tooltip: '一组杠的预制体' })
+    oldGangPrefab: Prefab = null!;
 
     @property({ type: Node, tooltip: '手牌区域' })
     handArea: Node = null!;
@@ -48,7 +52,7 @@ export class GameViewController extends Component {
         const tileComponent = newTileNode.getComponent(MajangTile);
         if (tileComponent) {
             tileComponent.init(pai);
-            if (target === this.handArea) {// 只有手牌区的麻将可以交互
+            if (target === this.handArea || target===this.newCardArea) {// 只有手牌区/新牌区的麻将可以交互
                 tileComponent.isInteractive = true;
             }
         } else {
@@ -59,6 +63,7 @@ export class GameViewController extends Component {
     }
 
     drawHandArea() {
+        console.log('重绘手牌区', this.gameLogic._gangs.length*4, this.gameLogic._hand)
         this.clearHandArea();
         const handAndNewCard = [...this.gameLogic._hand];
         if (this.gameLogic._newCard) {
@@ -68,6 +73,12 @@ export class GameViewController extends Component {
         // 为了方便管理，我们先移除旧的牌再添加新的
         this.allTileNodes = this.allTileNodes.filter(node => node.parent !== this.handArea && node.parent !== this.newCardArea);
 
+        // 添加杠
+        this.gameLogic._gangs.forEach(gs => {
+            const n = this.buildOldGangPrefab(gs)// 创建一个Node
+            this.handArea.addChild(n)// 添加到手牌区
+        })
+        // 添加手牌
         this.gameLogic._hand.forEach((p) => {
             this.addPaiTo(p, this.handArea);
         });
@@ -127,9 +138,22 @@ export class GameViewController extends Component {
         this.operationArea.removeAllChildren()
         mjs.forEach(m => {
             const p = instantiate(this.agangPrefab);
+            const ag = p.getComponent(AGangController);
+            if(ag) {// 传递游戏控制器
+                ag.init(this.gameLogic)
+            }
             const majangNode = p.getChildByName("Majang");
             this.addPaiTo(m, majangNode, 0.5, true);
             this.operationArea.addChild(p);
         })
+    }
+
+    // 创建一组杠
+    public buildOldGangPrefab(arr: MajangData[]): Node {
+        const p = instantiate(this.oldGangPrefab);
+        for (let i = 0; i < arr.length && i<4; i++) {
+            this.addPaiTo(arr[i], p, 1);
+        }
+        return p
     }
 }

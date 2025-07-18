@@ -2177,7 +2177,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": -410,
-      "y": -74.99999999999994,
+      "y": -71.99999999999994,
       "z": 0
     },
     "_lrot": {
@@ -2240,7 +2240,7 @@
     "_left": 10,
     "_right": 0,
     "_top": 0,
-    "_bottom": 120,
+    "_bottom": 123,
     "_horizontalCenter": 0,
     "_verticalCenter": 0,
     "_isAbsLeft": true,
@@ -2579,6 +2579,10 @@
     "__prefab": null,
     "majangPrefab": {
       "__uuid__": "1eee3d9a-d9a5-467a-a308-bf88dbf9d33f",
+      "__expectedType__": "cc.Prefab"
+    },
+    "oldGangPrefab": {
+      "__uuid__": "838c7410-fa64-44fb-9cd4-183b58f2d1fc",
       "__expectedType__": "cc.Prefab"
     },
     "handArea": {
