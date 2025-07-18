@@ -163,7 +163,9 @@ export class GameLogicController extends Component {
                 this._waitForGang.push(c[0]);
             }
         }
-        // 刷新待杠区显示
+        // 同时检测和牌
+        this.checkYaku()
+        // 刷新待杠区+和牌显示
         this.mainView.drawNewGangArea(this._waitForGang);
     }
 
@@ -198,8 +200,7 @@ export class GameLogicController extends Component {
 
     // 新增：检查当前手牌的役种并更新显示
     private checkYaku() {
-        const fullHand = [...this._hand, this._newCard];
-        const yakuResults = YakuCalculator.calculate(fullHand);
+        const yakuResults = YakuCalculator.calculate(this._gangs, [...this._hand, this._newCard]);
         //
         this.statucBarView.updateYakuDisplay(yakuResults);
     }
