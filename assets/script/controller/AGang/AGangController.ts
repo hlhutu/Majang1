@@ -1,4 +1,4 @@
-import {_decorator, Component, Sprite, Vec2, Rect, Node, EventTouch} from 'cc';
+import {_decorator, Component, Sprite, Vec2, Rect, Node, EventTouch, SpriteFrame} from 'cc';
 import {MajangData} from "db://assets/script/model/MajangData";
 import {GameViewController} from "db://assets/script/controller/GameViewController";
 import {YakuCalculator} from "db://assets/script/controller/YakuCalculator";
@@ -20,14 +20,27 @@ export class AGangController extends Component {
     private gameLogic: GameLogicController;// 游戏逻辑
 
     onLoad() {
-        // 修改资源的方位
         const sprite = this.getComponent(Sprite);
-        // 安全检查，确保Sprite和SpriteFrame都存在
         if (!sprite || !sprite.spriteFrame) {
             console.error("无法找到Sprite组件或其SpriteFrame。");
             return;
         }
-        sprite.spriteFrame.rect = new Rect(this.imgStart.x, this.imgStart.y, this.imgSize.x, this.imgSize.y);
+
+        // 1. 创建一个新的 SpriteFrame 实例
+        const newSpriteFrame = new SpriteFrame();
+
+        // 2. 将原始的纹理 (texture) 和信息赋给新实例
+        const originalSpriteFrame = sprite.spriteFrame;
+        newSpriteFrame.texture = originalSpriteFrame.texture;
+        newSpriteFrame.rotated = originalSpriteFrame.isRotated(); // 保持旋转信息
+        newSpriteFrame.insetTop = originalSpriteFrame.insetTop;   // 保持九宫格信息
+        newSpriteFrame.insetBottom = originalSpriteFrame.insetBottom;
+        newSpriteFrame.insetLeft = originalSpriteFrame.insetLeft;
+        newSpriteFrame.insetRight = originalSpriteFrame.insetRight;
+        // 3. 在新实例上设置 rect
+        newSpriteFrame.rect = new Rect(this.imgStart.x, this.imgStart.y, this.imgSize.x, this.imgSize.y);
+        // 4. 将这个全新的 SpriteFrame 赋给当前 Sprite 组件
+        sprite.spriteFrame = newSpriteFrame;
     }
 
     public init(gameLogic: GameLogicController) {
@@ -44,13 +57,14 @@ export class AGangController extends Component {
         this.node.off(Node.EventType.TOUCH_END, this.onClick, this);
     }
 
+    // 点击杠牌
     private onClick(event: EventTouch) {
         // 获取到当前的组件
         const componentInChildren = this.getComponentInChildren(MajangTile);
         if (componentInChildren) {// 找到其中的麻将组件
             this.gameLogic.moveToGangs(componentInChildren.majangData.key)
             // 之后再抽一张牌
-            this.gameLogic.claimCard()
+            this.gameLogic.claimCard(true)
         }else {
             console.error('MajangTile not found')
         }

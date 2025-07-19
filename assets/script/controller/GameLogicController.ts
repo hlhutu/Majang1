@@ -2,7 +2,7 @@
 import {_decorator, Component} from 'cc';
 import {MajangData} from "db://assets/script/model/MajangData";
 import {GameViewController} from "db://assets/script/controller/GameViewController";
-import {YakuCalculator} from "db://assets/script/controller/YakuCalculator";
+import {GameResult, YakuCalculator, YakuResult} from "db://assets/script/controller/YakuCalculator";
 import {StatusBarViewController} from "db://assets/script/controller/StatusBarManager";
 
 const { ccclass, property, requireComponent } = _decorator;
@@ -14,15 +14,21 @@ export class GameLogicController extends Component {
     private mainView: GameViewController; // 手牌区/桌子区
     private statucBarView: StatusBarViewController;// 状态区
 
-    _deck: MajangData[] = [];
-    _deckCount: number = 0;
-    _hand: MajangData[] = [];
+    _deck: MajangData[] = []; // 牌山
+    _deckCount: number = 0; // 手牌总数
+    _hand: MajangData[] = []; // 手牌（不含杠）
     _gangs: MajangData[][] = [];// 有杠的牌，加入到这里面，每一组四张牌
     _waitForGang: MajangData[] = [];// 等待杠，由玩家决定是否杠
-    _newCard: MajangData | null = null;
-    _table: MajangData[] = [];
+    _newCard: MajangData | null = null;// 新牌，右手第一张
+    _table: MajangData[] = []; // 桌面牌
 
-    _canPlay: boolean = false;
+    _plays: number = 10+1;// 出牌（抽牌）次数为10，杠牌之后抽牌不会减少次数
+    _justGang: boolean = false; // 上一手是否杠牌
+    _canPlay: boolean = false; // 此时是否可以打出手牌
+    _baseScore: number = 1; // 底分，默认1
+    _sumHan: number = 0;// 当前总翻数，总翻数大于0才可以和
+    _score: number = 0;// 总分，底分x翻数
+    _yks: GameResult = null;// 役种结果
 
     onLoad() {
         this.mainView = this.getComponent(GameViewController);
@@ -47,6 +53,10 @@ export class GameLogicController extends Component {
      * @param playedPai 要打出的牌
      */
     public playCard(playedPai: MajangData) {
+        if (this._plays<=0) {
+            console.log("出牌次数已用尽！");
+            return;
+        }
         if (!this._canPlay) {
             console.log("现在不是出牌阶段！");
             return;
@@ -131,12 +141,16 @@ export class GameLogicController extends Component {
     }
 
     // isFirst 是否首次抽牌
-    public claimCard() {
+    // fromGang 是否因为杠才摸牌
+    public claimCard(fromGang:boolean=false) {
+        this._justGang = fromGang;// 上一手是否是杠
+        if(!this._justGang){// 上一手不是杠，抽牌会减少抽牌次数
+            this._plays--
+        }
         if (this._deck.length === 0) {
             throw new Error("deck is empty");
         }
         this._newCard = this._deck.pop()!;
-        console.log('new', this._newCard)
         this.handSort();// 先排序
         this.mainView.drawHandArea();
         this.statucBarView.updateDeckDisplay();// 抽牌后刷新剩余牌数
@@ -163,8 +177,6 @@ export class GameLogicController extends Component {
                 this._waitForGang.push(c[0]);
             }
         }
-        // 同时检测和牌
-        this.checkYaku()
         // 刷新待杠区+和牌显示
         this.mainView.drawNewGangArea(this._waitForGang);
     }
@@ -175,20 +187,21 @@ export class GameLogicController extends Component {
             if(this._waitForGang[i].key === key) {// 如果找到目标
                 const t = this._waitForGang.splice(i, 1);// 移出这个元素
                 // 手牌中的牌放入老杠区
-                const newHands:MajangData[] = [];// 新的手牌
-                const tmpGangs:MajangData[] = [];
+                const oldHands:MajangData[] = [...this._hand, this._newCard];// 目前的手牌
+                const tmpGangs:MajangData[] = [];// 杠的牌
                 let count = 0;
-                for (let j = 0; j < this._hand.length; j++) {
-                    if(count<4 && t[0].key === this._hand[j].key) {// 先从前往后选择四个，之后做成手动的
-                        tmpGangs.push(this._hand[j]);// 移入老杠区
+                this._hand = []// 清空手牌
+                for (let j = 0; j < oldHands.length; j++) {
+                    if(count<4 && t[0].key === oldHands[j].key) {// 先从前往后选择四个，之后做成手动的
+                        tmpGangs.push(oldHands[j]);// 移入老杠区
                         count++;
                     }else {
-                        newHands.push(this._hand[j]);// 保存到手牌中
+                        this._hand.push(oldHands[j]);// 保存到手牌中
                     }
                 }
                 this._gangs.push(tmpGangs);// 加入杠区
-                this._hand = newHands;
                 // 如果有新牌，则并入手牌
+                debugger
                 if (this._newCard) {
                     this._hand.push(this._newCard);
                     this._newCard = null;
@@ -200,8 +213,20 @@ export class GameLogicController extends Component {
 
     // 新增：检查当前手牌的役种并更新显示
     private checkYaku() {
-        const yakuResults = YakuCalculator.calculate(this._gangs, [...this._hand, this._newCard]);
-        //
-        this.statucBarView.updateYakuDisplay(yakuResults);
+        this._yks = YakuCalculator.calculate(
+            this._gangs,
+            [...this._hand, this._newCard],
+            this._newCard,
+            1,// 自己坐东风
+            1,// 场风也默认东
+            this._justGang,// 是否刚才杠过
+        );
+        this._baseScore = 1;// 底分
+        this._sumHan = this._yks.sumHan// 翻数
+        this._score = this._baseScore*this._sumHan;// 总分
+        // 刷新状态栏显示
+        this.statucBarView.updateYakuDisplay();
+        // 如果和牌并且有役，添加一个和牌按钮
+        this.mainView.drawHuButton(this._yks.ifWin && this._yks.sumHan>0);
     }
 }

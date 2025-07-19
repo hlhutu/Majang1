@@ -34,7 +34,7 @@ export class StatusBarViewController extends Component {
         this.deckLabel = this.statusBar.getChildByName("DeckLabel").getComponent(Label);
         this.playsLabel = this.statusBar.getChildByName("PlaysLabel").getComponent(Label);
         this.basePointLabel = this.statusBar.getChildByName("BasePointLabel").getComponent(Label);
-        this.scoreLabel = this.statusBar.getChildByName("BasePointLabel").getComponent(Label);
+        this.scoreLabel = this.statusBar.getChildByName("ScoreLabel").getComponent(Label);
         this.yakuContainer = this.statusBar.getChildByName("Yaku").getChildByName("view").getChildByName("YakuContainer");
     }
 
@@ -44,15 +44,19 @@ export class StatusBarViewController extends Component {
     }
 
     // 刷新役种显示
-    public updateYakuDisplay(yks:YakuResult[]) {
+    public updateYakuDisplay() {
         // 清空现在的役种列表
         this.yakuContainer.removeAllChildren()
-        // 重新添加
-        yks.forEach(yk => {
+        // 重新添加所有役种
+        this.gameLogic._yks.yakus.forEach(yk => {
             const labelNode = instantiate(this.labelPrefab);
             const label = labelNode.getComponent(Label);
             label.string = `${yk.name} x${yk.han}`;
             this.yakuContainer.addChild(labelNode);
         })
+        // 重绘出牌次数
+        this.playsLabel.string = `Plays\n${this.gameLogic._plays}`;
+        // 重绘总分
+        this.scoreLabel.string = `x${this.gameLogic._sumHan}=${this.gameLogic._score}`
     }
 }

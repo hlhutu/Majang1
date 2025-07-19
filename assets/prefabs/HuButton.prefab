@@ -286,8 +286,8 @@
     },
     "imgStart": {
       "__type__": "cc.Vec2",
-      "x": 220,
-      "y": 460
+      "x": 440,
+      "y": 610
     },
     "imgSize": {
       "__type__": "cc.Vec2",

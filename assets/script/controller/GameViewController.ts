@@ -5,6 +5,7 @@ import {MajangTile} from "db://assets/script/controller/MajangTile";
 import { GameLogicController} from "db://assets/script/controller/GameLogicController";
 import {YakuResult} from "db://assets/script/controller/YakuCalculator";
 import {AGangController} from "db://assets/script/controller/AGang/AGangController";
+import {HuController} from "db://assets/script/controller/AGang/HuController";
 const { ccclass, property, requireComponent } = _decorator;
 
 @ccclass('GameViewController')
@@ -35,6 +36,9 @@ export class GameViewController extends Component {
     @property({ type: Prefab, tooltip: '杠的预制体' })
     agangPrefab: Prefab = null!;
 
+    @property({ type: Prefab, tooltip: '和牌按钮的预制体' })
+    huPrefab: Prefab = null!;
+
     onLoad() {
         this.gameLogic = this.getComponent(GameLogicController);
     }
@@ -63,7 +67,7 @@ export class GameViewController extends Component {
     }
 
     drawHandArea() {
-        console.log('重绘手牌区', this.gameLogic._gangs.length*4, this.gameLogic._hand)
+        console.log('重绘手牌区\n', this.gameLogic._gangs, this.gameLogic._hand)
         this.clearHandArea();
         const handAndNewCard = [...this.gameLogic._hand];
         if (this.gameLogic._newCard) {
@@ -135,7 +139,12 @@ export class GameViewController extends Component {
 
     // 刷新新产生的杠区
     public drawNewGangArea(mjs: MajangData[]) {
-        this.operationArea.removeAllChildren()
+        // 移除所有的 杠牌按钮
+        for (const child of [...this.operationArea.children]) {
+            if (child.getComponent(AGangController)) {
+                child.destroy(); // 或者 child.removeFromParent();
+            }
+        }
         mjs.forEach(m => {
             const p = instantiate(this.agangPrefab);
             const ag = p.getComponent(AGangController);
@@ -146,6 +155,26 @@ export class GameViewController extends Component {
             this.addPaiTo(m, majangNode, 0.5, true);
             this.operationArea.addChild(p);
         })
+    }
+
+    // 刷新和牌按钮
+    public drawHuButton(show: boolean) {
+        // 移除所有的 和牌按钮
+        for (const child of [...this.operationArea.children]) {
+            if (child.getComponent(HuController)) {
+                child.destroy(); // 或者 child.removeFromParent();
+            }
+        }
+        // 再决定是否显示
+        if (show) {
+            const p = instantiate(this.huPrefab);
+            p.setScale(new Vec3(1.2, 1.2, 1.2))
+            const ag = p.getComponent(HuController);
+            if(ag) {// 传递游戏控制器
+                ag.init(this.gameLogic)
+            }
+            this.operationArea.addChild(p);
+        }
     }
 
     // 创建一组杠

@@ -5,7 +5,7 @@ export class MajangData {
     public id: number;// id值
     public key: string; // 麻将key
     public color: string; // 花色
-    public point: number; // 点数，风/三元牌为0点
+    public point: number; // 点数，东南西北=1234，中发白=123
     public dir: string = "images"; // 图片所在的目录
     public img: string; // 图片资源路径
 
