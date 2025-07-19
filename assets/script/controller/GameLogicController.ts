@@ -22,7 +22,7 @@ export class GameLogicController extends Component {
     _newCard: MajangData | null = null;// 新牌，右手第一张
     _table: MajangData[] = []; // 桌面牌
 
-    _plays: number = 10+1;// 出牌（抽牌）次数为10，杠牌之后抽牌不会减少次数
+    _plays: number = 20+1;// 出牌（抽牌）次数为10，杠牌之后抽牌不会减少次数
     _justGang: boolean = false; // 上一手是否杠牌
     _canPlay: boolean = false; // 此时是否可以打出手牌
     _baseScore: number = 1; // 底分，默认1
@@ -111,12 +111,12 @@ export class GameLogicController extends Component {
     private shuffleDeck() {
         this._deck = [...MajangData.MajangLib];
         this._deckCount = this._deck.length;
-        // let i = this._deck.length;
-        // while (i > 0) {
-        //     const j = Math.floor(Math.random() * i);
-        //     i--;
-        //     [this._deck[i], this._deck[j]] = [this._deck[j], this._deck[i]];
-        // }
+        let i = this._deck.length;
+        while (i > 0) {
+            const j = Math.floor(Math.random() * i);
+            i--;
+            [this._deck[i], this._deck[j]] = [this._deck[j], this._deck[i]];
+        }
     }
 
     private dealHand(count: number) {
@@ -125,8 +125,6 @@ export class GameLogicController extends Component {
             const pai = this._deck.pop()!;
             this._hand.push(pai);
         }
-        // this.handSort();
-        // this.mainView.drawHandArea();
     }
 
     private handSort() {
@@ -191,6 +189,7 @@ export class GameLogicController extends Component {
                 const tmpGangs:MajangData[] = [];// 杠的牌
                 let count = 0;
                 this._hand = []// 清空手牌
+                this._newCard = null;// 清空新牌
                 for (let j = 0; j < oldHands.length; j++) {
                     if(count<4 && t[0].key === oldHands[j].key) {// 先从前往后选择四个，之后做成手动的
                         tmpGangs.push(oldHands[j]);// 移入老杠区
@@ -200,12 +199,6 @@ export class GameLogicController extends Component {
                     }
                 }
                 this._gangs.push(tmpGangs);// 加入杠区
-                // 如果有新牌，则并入手牌
-                debugger
-                if (this._newCard) {
-                    this._hand.push(this._newCard);
-                    this._newCard = null;
-                }
                 break;
             }
         }

@@ -63,7 +63,9 @@ export class GameViewController extends Component {
             console.log(`错误：麻将Prefab上没有找到 MajangTile 脚本！`);
         }
         target.addChild(newTileNode);
-        this.allTileNodes.push(newTileNode); // 新增：将新创建的节点添加到列表中
+        if(!isClone) {
+            this.allTileNodes.push(newTileNode); // 新增：将新创建的节点添加到列表中
+        }
     }
 
     drawHandArea() {
