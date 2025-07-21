@@ -17,6 +17,7 @@ export class Runtime {
     gold: number;// 金币，初始为5，每局胜利后可获得金币5。每5枚金币可获得利息1。
 
     deck: MahjongData[]; // 牌山
+    deckOriginal: MahjongData[]; // 原始牌山
     hand: MahjongData[]; // 手牌（不含杠）
     gangs: MahjongData[][];// 有杠的牌，加入到这里面，每一组四张牌
     newCard: MahjongData | null;// 新牌，右手第一张 (注意：这里推荐使用 | null)
@@ -37,26 +38,42 @@ export class Runtime {
     // 初始化数据，根据选择的 难度和牌组
     public init(): void {
         if (this.difficulty <= 0) {
-            this.initFor0();// 难度0初始化
+            this.initForNewGame0();// 难度0 新开一局
         } else {
             console.error(`不支持难度${this.difficulty}`)
         }
     }
 
-    // 难度0的初始化
-    public initFor0(): void {
-        console.log(`开始游戏 ${this.difficulty}-${this.deckName}`)
-        this.difficulty = 0;// 难度
+    public initForNewRound(): void {
+        if (this.difficulty <= 0) {
+            this.initForNewRound0();// 难度0初始化
+        } else {
+            console.error(`不支持难度${this.difficulty}`)
+        }
+    }
 
+    // 难度0 新开游戏
+    private initForNewGame0(): void {
+        console.log(`开始游戏 ${this.difficulty}-${this.deckName}`)
         // --- 关卡与进程数据 ---
         this.currentStage = 0;         // 游戏从第0关开始，未进入游戏
         this.targetPoint = 0;          // 难度0的第一关，设定一个较低的目标分数
         this.prevalentWind = 0;        // 0=未开始
         this.currentPoint = 0;         // 关卡开始时，当前积攒的点数为0
         this.selfWind = 1;             // 游戏开始，玩家默认是东家，自风为东 (1=东)
-
         // --- 资源数据 ---
         this.gold = 5;                 // 根据描述，初始金币为5
+        // --- 动态牌山 ---
+        if(this.deckName=='default'){
+            this.deckOriginal = structuredClone(Global.libs.defaultLib); // 以默认牌组开始
+        } else {
+            console.error(`无法识别牌山${this.deckName}`)
+        }
+    }
+
+    // 难度0 新开一局
+    private initForNewRound0(): void {
+        console.log(`开局 ${this.difficulty}-${this.deckName}`)
 
         // --- 牌局核心数据 (一局开始前的状态) ---
         this.hand = [];                // 手牌在发牌前是空的
@@ -76,12 +93,8 @@ export class Runtime {
         this.yks = null;               // 还没有和牌，因此没有役种结果
         this.relics = null;            // 遗物为空
 
-        // --- 动态牌山 ---
-        if(this.deckName=='default'){
-            this.deck = structuredClone(Global.libs.defaultLib); // 以默认牌组开始
-        } else {
-            console.error(`无法识别牌山${this.deckName}`)
-        }
+        // --- 重设牌山 ---
+        this.deck = structuredClone(this.deckOriginal);
     }
 }
 

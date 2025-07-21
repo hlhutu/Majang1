@@ -94,3 +94,5 @@ export const EVENT_CARD_HOVER_LEAVE: string = 'EVENT_CARD_HOVER_LEAVE';// 离开
 export const EVENT_GANG:string = 'EVENT_GANG';// 杠事件
 export const EVENT_HU:string = 'EVENT_HU';// 和事件
 export const EVENT_ROUND_CAL: string = `EVENT_ROUND_CAL`;// 局结算
+export const EVENT_FAIL:string = 'EVENT_FAIL';// 出牌次数用完失败
+export const EVENT_LIUJU:string = 'EVENT_LIUJU';// 流局，抽牌牌山失败

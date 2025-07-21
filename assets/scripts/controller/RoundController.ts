@@ -1,8 +1,8 @@
 import {_decorator, Component, director, game, Label, Node, randomRangeInt } from 'cc';
 import { runtime } from "db://assets/scripts/data/Runtime";
 import {
-    EVENT_CLAIM_END,
-    EVENT_GAME_START, EVENT_GANG, EVENT_HU, EVENT_PLAY_CARD, EVENT_ROUND_CAL,
+    EVENT_CLAIM_END, EVENT_FAIL,
+    EVENT_GAME_START, EVENT_GANG, EVENT_HU, EVENT_LIUJU, EVENT_PLAY_CARD, EVENT_ROUND_CAL,
     EVENT_ROUND_START,
     EVENT_STAGE_UP,
     eventBus
@@ -34,8 +34,7 @@ export class RoundController {
     }
 
     private roundStart() {
-        runtime.table = [];// 清空桌面
-        runtime.plays = 100+1;// 多给点出牌次数
+        runtime.initForNewRound();// 新开一局，重置runtime数据
         this.shuffleDeck();// 洗牌
         this.dealHand(13);// 抽13张牌
         this.claimCard();// 首次抽牌
@@ -48,7 +47,7 @@ export class RoundController {
      */
     public playCard(playedPai: MahjongData) {
         if (runtime.plays<=0) {
-            console.log("出牌次数已用尽！");
+            eventBus.emit(EVENT_FAIL)// 抽牌次数用尽失败
             return;
         }
         if (!runtime.canPlay) {
@@ -93,11 +92,11 @@ export class RoundController {
     private shuffleDeck() {
         runtime.deckCount = runtime.deck.length;// 洗牌前，记录牌的总数
         let i = runtime.deck.length;
-        // while (i > 0) {// 洗牌
-        //     const j = Math.floor(Math.random() * i);
-        //     i--;
-        //     [runtime.deck[i], runtime.deck[j]] = [runtime.deck[j], runtime.deck[i]];
-        // }
+        while (i > 0) {// 洗牌
+            const j = Math.floor(Math.random() * i);
+            i--;
+            [runtime.deck[i], runtime.deck[j]] = [runtime.deck[j], runtime.deck[i]];
+        }
     }
 
     private dealHand(count: number) {
@@ -125,8 +124,9 @@ export class RoundController {
         if(!runtime.justGang){// 上一手不是杠，抽牌会减少抽牌次数
             runtime.plays--
         }
-        if (runtime.deck.length === 0) {
-            throw new Error("deck is empty");
+        if (runtime.deck.length === 0) {// 流局
+            eventBus.emit(EVENT_LIUJU)
+            return
         }
         runtime.newCard = runtime.deck.pop()!;
         this.handSort();// 先排序

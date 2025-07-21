@@ -17,7 +17,7 @@ export class AssetManager extends Component {
             director.addPersistRootNode(this.node);
         } else {
             // 如果实例已存在，则销毁当前这个重复的节点，以保证单例的唯一性
-            this.destroy();
+            this.node.destroy();
         }
     }
     // ---------------------------
