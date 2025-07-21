@@ -1,6 +1,12 @@
 import {_decorator, Component, director, game, Label, Node, randomRangeInt } from 'cc';
 import { runtime } from "db://assets/scripts/data/Runtime";
-import {EVENT_GAME_START, EVENT_ROUND_START, EVENT_STAGE_UP, eventBus} from "db://assets/scripts/common/EventManager";
+import {
+    EVENT_CLAIM_END,
+    EVENT_GAME_START, EVENT_GANG, EVENT_HU, EVENT_PLAY_CARD,
+    EVENT_ROUND_START,
+    EVENT_STAGE_UP,
+    eventBus
+} from "db://assets/scripts/common/EventManager";
 import {Global} from "db://assets/scripts/data/Global";
 import {MahjongData} from "db://assets/scripts/model/MahjongData";
 import {YakuCalculator} from "db://assets/scripts/controller/YakuCalculator";
@@ -19,11 +25,24 @@ export class RoundController {
         return RoundController.instance;
     }
     private constructor() {
-        eventBus.on(EVENT_ROUND_START, this.roundStart, -1)
+        eventBus.on(EVENT_ROUND_START, () => { this.roundStart() }, -1)
+
+        eventBus.on(EVENT_PLAY_CARD, (m) => {// 打出一张牌
+            this.playCard(m)
+        }, -1)
+        eventBus.on(EVENT_GANG, (m) => {// 杠牌
+            this.moveToGangs(m.key);// 移动到已杠区
+            this.claimCard(true);// 立即抽一张牌
+        }, -1)
+        eventBus.on(EVENT_HU, (m) => {// 和牌
+
+        })
     }
 
     private roundStart() {
         runtime.selfWind = randomRangeInt(1, 5);// 随机自风
+        runtime.table = [];// 清空桌面
+        runtime.plays = 100+1;// 多给点出牌次数
         this.shuffleDeck();// 洗牌
         this.dealHand(13);// 抽13张牌
         this.claimCard();// 首次抽牌
@@ -70,19 +89,22 @@ export class RoundController {
             runtime.hand.push(runtime.newCard);
             runtime.newCard = null;
         }
-        // 手牌重新排序
-        this.handSort();
-        runtime.showHand()
+        this.handSort();// 进行一次排序
+        // 0.5秒后再次抽牌
+        setTimeout(() => {
+            this.claimCard();
+            runtime.canPlay = true; // 允许下一次出牌
+        }, 500); // 单位是毫秒 (ms)
     }
 
     private shuffleDeck() {
         runtime.deckCount = runtime.deck.length;// 洗牌前，记录牌的总数
         let i = runtime.deck.length;
-        while (i > 0) {// 洗牌
-            const j = Math.floor(Math.random() * i);
-            i--;
-            [runtime.deck[i], runtime.deck[j]] = [runtime.deck[j], runtime.deck[i]];
-        }
+        // while (i > 0) {// 洗牌
+        //     const j = Math.floor(Math.random() * i);
+        //     i--;
+        //     [runtime.deck[i], runtime.deck[j]] = [runtime.deck[j], runtime.deck[i]];
+        // }
     }
 
     private dealHand(count: number) {
@@ -117,6 +139,8 @@ export class RoundController {
         this.handSort();// 先排序
         this.checkGangs([...runtime.hand, runtime.newCard]);// 抽牌后判断是否可以开杠
         this.checkYaku(); // 摸牌后检查役种
+        // 发出手牌结束事件
+        eventBus.emit(EVENT_CLAIM_END, runtime.newCard);
     }
 
     // 验证是否有杠，会把所有可以杠的牌显示出来

@@ -22,9 +22,11 @@ export class EntranceView extends Component {
         // 模拟选择难度0，默认牌组
         runtime.difficulty = 0;
         runtime.deckName = 'default';
-        // 发布
-        eventBus.emit(EVENT_GAME_START); // 发布游戏开始事件
-        director.loadScene("scenes/WindSelectScene");
+        // 跳转场景
+        director.loadScene("scenes/WindSelectScene", () => {
+            eventBus.emit(EVENT_GAME_START); // 发布游戏开始事件
+            eventBus.emit(EVENT_STAGE_UP,1); // 发布进入关卡事件
+        });
     }
 
     clickExit() {

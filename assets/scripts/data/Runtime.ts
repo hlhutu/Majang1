@@ -84,20 +84,12 @@ export class Runtime {
         }
     }
     // 关卡提升
-    public stageUp() {
-        this.currentStage++; // 当前关卡+1
+    public stageUp(level:number) {
+        this.currentStage = level; // 当前关卡+1
         console.log('关卡提升到'+this.currentStage)
         this.prevalentWind = 1;// 从东风开始
         this.targetPoint = Global.stages[this.difficulty][this.currentStage-1]// 目标分数
         this.currentPoint = 0;         // 关卡开始时，当前积攒的点数为0
-    }
-    // 调试方法，打印手牌，包括杠区和新牌区
-    public showHand() {
-        console.log('===========================')
-        console.log('gangs', this.gangs)
-        console.log('hand', this.hand)
-        console.log('new', this.newCard)
-        console.log('===========================')
     }
 }
 

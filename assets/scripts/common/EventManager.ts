@@ -77,5 +77,12 @@ export const eventBus = EventManager.getInstance();
 export const EVENT_GAME_START: string = 'GAME_START';// 游戏开始事件，选择了难度和牌山
 export const EVENT_GAME_END: string = 'GAME_END';// 游戏结束事件，返回到开始画面
 export const EVENT_APP_EXIT: string = 'APP_EXIT';// 整个程序退出
-export const EVENT_STAGE_UP: string = 'STAGE_UP';// 等级提升
+export const EVENT_STAGE_UP: string = 'STAGE_UP';// 进入关卡
 export const EVENT_ROUND_START: string = 'ROUND_START'; // 一局开始
+
+export const EVENT_CLAIM_END: string = 'EVENT_CLAIM_END'; // 抽牌结束
+export const EVENT_PLAY_CARD: string = 'EVENT_PLAY_CARD'; // 打出一张牌
+export const EVENT_CARD_HOVER: string = 'EVENT_CARD_HOVER';// 悬浮在牌上
+export const EVENT_CARD_HOVER_LEAVE: string = 'EVENT_CARD_HOVER_LEAVE';// 离开悬浮
+export const EVENT_GANG:string = 'EVENT_GANG';// 杠事件
+export const EVENT_HU:string = 'EVENT_HU';// 和事件

@@ -1,4 +1,4 @@
-import {_decorator, Component, director, game, Label, Node } from 'cc';
+import {_decorator, Component, director, game, Label, Node, Button } from 'cc';
 import { runtime } from "db://assets/scripts/data/Runtime";
 import {
     EVENT_GAME_END,
@@ -19,22 +19,33 @@ export class WindSelectView extends Component {
     @property({ type: Node, tooltip: '文本节点' })
     textArea: Node;
 
-    private label1:Label;
+    @property({ type: [Node], tooltip: '东西南北的开始按钮' })
+    buttons: Node[] = [];
 
     onLoad() {
-        eventBus.emit(EVENT_STAGE_UP); // 进入场景，表示关卡提升了
+    }
+
+    update() {
+        // 刷新顶部文字显示
         this.textArea.getChildByName("Label1").getComponent(Label).string
             = `${runtime.difficulty}-${runtime.deckName} ${runtime.currentStage}-${Global.windStrs[runtime.prevalentWind]}
 ${runtime.currentPoint}/${runtime.targetPoint}`;
+        // 刷新按钮
+        for (let i = 0; i < this.buttons.length; i++) {
+            this.buttons[i].active = runtime.prevalentWind==i+1
+        }
     }
 
     clickRoundStart() {
-        eventBus.emit(EVENT_ROUND_START);// 发布对局开始事件
-        director.loadScene("scenes/RoundScene")// 跳转到对局场景
+        // 跳转到对局场景
+        director.loadScene("scenes/RoundScene", () => {
+            eventBus.emit(EVENT_ROUND_START);// 发布对局开始事件
+        })
     }
 
     clickBack() {
-        eventBus.emit(EVENT_GAME_END);// 发布游戏结束事件
-        director.loadScene("scenes/StartScene");
+        director.loadScene("scenes/StartScene", () => {
+            eventBus.emit(EVENT_GAME_END);// 发布游戏结束事件
+        });
     }
 }

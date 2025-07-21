@@ -16,8 +16,8 @@ export class WindSelectController {
         return WindSelectController.instance;
     }
     private constructor() {
-        eventBus.on(EVENT_STAGE_UP, function () {// 等级提升
-            runtime.stageUp();// 关卡提升
+        eventBus.on(EVENT_STAGE_UP, function (level: number) {// 进入关卡
+            runtime.stageUp(level);// 关卡提升
         }, -1)
     }
 }
