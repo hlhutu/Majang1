@@ -18,11 +18,15 @@ class EntranceController {
         return EntranceController.instance;
     }
     private constructor() {// 游戏内容初始化
-        eventBus.on(EVENT_GAME_START, function () {// 监听游戏开始事件
-            runtime.init();
-        }, -1)
-        eventBus.on(EVENT_GAME_END, function () {// 监听游戏结束事件
-        }, -1)
+        eventBus.on(EVENT_GAME_START, this.init, this, -1)
+    }
+
+    private init() {
+        runtime.init();
+    }
+
+    private gameOver(): void {
+
     }
 }
 // 全局访问点

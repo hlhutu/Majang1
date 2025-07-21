@@ -28,7 +28,7 @@ export class WindSelectView extends Component {
     update() {
         // 刷新顶部文字显示
         this.textArea.getChildByName("Label1").getComponent(Label).string
-            = `${runtime.difficulty}-${runtime.deckName} ${runtime.currentStage}-${Global.windStrs[runtime.prevalentWind]}
+            = `${runtime.difficulty}-${runtime.deckName} ${runtime.currentStage}-${Global.windStrs[runtime.prevalentWind]}(${Global.windStrs[runtime.selfWind]})
 ${runtime.currentPoint}/${runtime.targetPoint}`;
         // 刷新按钮
         for (let i = 0; i < this.buttons.length; i++) {

@@ -2,7 +2,7 @@ import {_decorator, Component, director, game, Label, Node, randomRangeInt } fro
 import { runtime } from "db://assets/scripts/data/Runtime";
 import {
     EVENT_CLAIM_END,
-    EVENT_GAME_START, EVENT_GANG, EVENT_HU, EVENT_PLAY_CARD,
+    EVENT_GAME_START, EVENT_GANG, EVENT_HU, EVENT_PLAY_CARD, EVENT_ROUND_CAL,
     EVENT_ROUND_START,
     EVENT_STAGE_UP,
     eventBus
@@ -25,22 +25,15 @@ export class RoundController {
         return RoundController.instance;
     }
     private constructor() {
-        eventBus.on(EVENT_ROUND_START, () => { this.roundStart() }, -1)
-
-        eventBus.on(EVENT_PLAY_CARD, (m) => {// 打出一张牌
-            this.playCard(m)
-        }, -1)
+        eventBus.on(EVENT_ROUND_START, this.roundStart, this, -1)
+        eventBus.on(EVENT_PLAY_CARD, this.playCard, this, -1)
         eventBus.on(EVENT_GANG, (m) => {// 杠牌
             this.moveToGangs(m.key);// 移动到已杠区
             this.claimCard(true);// 立即抽一张牌
-        }, -1)
-        eventBus.on(EVENT_HU, (m) => {// 和牌
-
-        })
+        }, this, -1)
     }
 
     private roundStart() {
-        runtime.selfWind = randomRangeInt(1, 5);// 随机自风
         runtime.table = [];// 清空桌面
         runtime.plays = 100+1;// 多给点出牌次数
         this.shuffleDeck();// 洗牌
@@ -195,8 +188,8 @@ export class RoundController {
             runtime.gangs,
             [...runtime.hand, runtime.newCard],
             runtime.newCard,
-            1,// 自己坐东风
-            1,// 场风也默认东
+            runtime.selfWind,// 自风
+            runtime.prevalentWind,// 场风
             runtime.justGang,// 是否刚才杠过
         );
         runtime.baseScore = 1;// 底分

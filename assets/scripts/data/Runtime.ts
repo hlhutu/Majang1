@@ -83,14 +83,6 @@ export class Runtime {
             console.error(`无法识别牌山${this.deckName}`)
         }
     }
-    // 关卡提升
-    public stageUp(level:number) {
-        this.currentStage = level; // 当前关卡+1
-        console.log('关卡提升到'+this.currentStage)
-        this.prevalentWind = 1;// 从东风开始
-        this.targetPoint = Global.stages[this.difficulty][this.currentStage-1]// 目标分数
-        this.currentPoint = 0;         // 关卡开始时，当前积攒的点数为0
-    }
 }
 
 export const runtime: Runtime = new Runtime();// 运行时数据

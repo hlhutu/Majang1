@@ -1,4 +1,4 @@
-import { _decorator, Component, SpriteFrame } from 'cc';
+import { _decorator, Component, SpriteFrame, director } from 'cc';
 const { ccclass, property } = _decorator;
 
 @ccclass('AssetManager')
@@ -13,8 +13,10 @@ export class AssetManager extends Component {
     onLoad() {
         if (AssetManager._instance === null) {
             AssetManager._instance = this;
-            // console.log("AssetManager initialized!");
+            // 关键：将该组件所在的节点标记为常驻节点
+            director.addPersistRootNode(this.node);
         } else {
+            // 如果实例已存在，则销毁当前这个重复的节点，以保证单例的唯一性
             this.destroy();
         }
     }

@@ -1,8 +1,8 @@
-import {_decorator, Component, director, game, Label, Node, Prefab, instantiate, Vec3, Sprite, Color, Button } from 'cc';
+import {_decorator, Component, director, game, Label, Node, Prefab, instantiate, Vec3, Sprite, Color, Button, UIOpacity, tween } from 'cc';
 import { runtime } from "db://assets/scripts/data/Runtime";
 import {
     EVENT_CARD_HOVER, EVENT_CARD_HOVER_LEAVE,
-    EVENT_CLAIM_END, EVENT_GANG, EVENT_HU, EVENT_PLAY_CARD,
+    EVENT_CLAIM_END, EVENT_GANG, EVENT_HU, EVENT_PLAY_CARD, EVENT_ROUND_CAL,
     EVENT_ROUND_START,
     eventBus
 } from "db://assets/scripts/common/EventManager";
@@ -51,6 +51,9 @@ export class RoundView extends Component {
     @property({ type: Prefab, tooltip: "一组杠的预制体" })
     gangGroupPrefab:Prefab
 
+    @property({ type: Node, tooltip: "展示局结果" })
+    resultPanel:Node = null!;
+
     private handsNode: Node = null;
     private finalScoreLabel: Node = null;
     private playsLabel: Node = null;
@@ -59,34 +62,55 @@ export class RoundView extends Component {
     private allTileNodes: Node[] = [];// 记录所有牌
 
     onLoad() {
+        // 关键：将该组件所在的节点标记为常驻节点
+        director.addPersistRootNode(this.node);
         this.handsNode = this.handArea.getChildByName("Hands");
-        this.finalScoreLabel = this.textArea.getChildByName("FinalScoreLabel")
-        this.playsLabel = this.textArea.getChildByName("PlaysLabel")
-        this.deckLabel = this.textArea.getChildByName("DeckLabel")
-        this.stageLabel = this.textArea.getChildByName("StageLabel")
+        this.finalScoreLabel = this.textArea.getChildByName("FinalScoreLabel");
+        this.playsLabel = this.textArea.getChildByName("PlaysLabel");
+        this.deckLabel = this.textArea.getChildByName("DeckLabel");
+        this.stageLabel = this.textArea.getChildByName("StageLabel");
 
-        eventBus.on(EVENT_ROUND_START, () => {
-            this.drawTableArea();
-        });
-        eventBus.on(EVENT_CLAIM_END, () => {// 抽取一张牌
-            this.drawHands(); // 刷新手牌区
-            this.drawOperationArea(); // 刷新操作区
-            this.drawTextArea();// 刷新文字
-            this.drawTableArea(); // 刷新桌面区
-        }, 1);
-        eventBus.on(EVENT_PLAY_CARD, (m) => {// 打出一张牌
-            this.drawHands(); // 刷新手牌区
-            this.drawOperationArea(); // 刷新操作区
-            this.drawTextArea();// 刷新文字
-            this.drawTableArea(); // 刷新桌面区
-        }, 1)
-        eventBus.on(EVENT_CARD_HOVER, (m) => {// 有牌悬浮
-            this.highlightSameTiles(m)
-        })
-        eventBus.on(EVENT_CARD_HOVER_LEAVE, (m) => {// 离开悬浮
-            this.resetAllTilesColor()
-        })
+        // 使用类方法作为回调，并绑定 this
+        eventBus.on(EVENT_ROUND_START, this.onRoundStart, this);
+        eventBus.on(EVENT_CLAIM_END, this.redrawAllViews, this);
+        eventBus.on(EVENT_PLAY_CARD, this.redrawAllViews, this);
+        eventBus.on(EVENT_CARD_HOVER, this.highlightSameTiles, this);
+        eventBus.on(EVENT_CARD_HOVER_LEAVE, this.resetAllTilesColor, this);
+        eventBus.on(EVENT_HU, this.onHu, this);
+    }
 
+    onDestroy() {
+        console.log("RoundView is being destroyed, removing listeners.");
+        // 确保移除的函数和绑定的 this 与注册时完全一致
+        eventBus.off(EVENT_ROUND_START, this.onRoundStart, this);
+        eventBus.off(EVENT_CLAIM_END, this.redrawAllViews, this);
+        eventBus.off(EVENT_PLAY_CARD, this.redrawAllViews, this);
+        eventBus.off(EVENT_CARD_HOVER, this.highlightSameTiles, this);
+        eventBus.off(EVENT_CARD_HOVER_LEAVE, this.resetAllTilesColor, this);
+        eventBus.off(EVENT_HU, this.onHu, this);
+    }
+
+    // 将原来的匿名函数逻辑，放到对应的类方法中
+    onRoundStart() {
+        this.closeResultPanel();
+        this.drawTableArea();
+    }
+
+    // RoundView.ts
+
+    private redrawAllViews() {
+        // 关键第一步：在销毁任何节点之前，先清空对它们的引用列表
+        this.allTileNodes = [];
+
+        // 然后再调用各个部分的绘制函数
+        this.drawHands();
+        this.drawOperationArea();
+        this.drawTextArea();
+        this.drawTableArea();
+    }
+
+    onHu() {
+        this.openResultPanel();
     }
 
     private drawOperationArea() {
@@ -119,7 +143,7 @@ export class RoundView extends Component {
         this.finalScoreLabel.getComponent(Label).string = `${runtime.baseScore} x${runtime.sumHan} = ${NumberFormatter.format(runtime.score)}`
         this.playsLabel.getComponent(Label).string = `Plays: ${runtime.plays}`
         this.deckLabel.getComponent(Label).string = `Deck: ${runtime.deck.length}/${runtime.deckCount}`
-        this.stageLabel.getComponent(Label).string = `${runtime.currentStage}-${Global.windStrs[runtime.prevalentWind]}
+        this.stageLabel.getComponent(Label).string = `${runtime.currentStage}-${Global.windStrs[runtime.prevalentWind]}(${Global.windStrs[runtime.selfWind]})
 ${runtime.currentPoint}/${runtime.targetPoint}`
         // 重绘役种区
         this.yakuContent.removeAllChildren();
@@ -139,8 +163,8 @@ ${runtime.currentPoint}/${runtime.targetPoint}`
     }
 
     private drawHands() {
-        this.handsNode.removeAllChildren();// 清空手牌区
         this.newCardArea.removeAllChildren();// 清空新牌区
+        this.handsNode.removeAllChildren();// 清空手牌区
         // 先添加杠组
         runtime.gangs.forEach(gangs => {
             const groupNode = instantiate(this.gangGroupPrefab);
@@ -204,5 +228,39 @@ ${runtime.currentPoint}/${runtime.targetPoint}`
                 sprite.color = Color.WHITE; // 恢复原色
             }
         });
+    }
+
+    private closeResultPanel() {
+        this.resultPanel.active = false;
+    }
+
+    private openResultPanel() {
+        runtime.canPlay = false; // 打开局结果时，不能继续打牌了
+        const label = this.resultPanel.getChildByPath("Button/Label");
+        label.getComponent(Label).string = `继续（+${runtime.score}）`;
+        this.resultPanel.active = true;
+        // 播放动画
+        let uiOpacity = this.resultPanel.getComponent(UIOpacity);
+        if (!uiOpacity) {
+            uiOpacity = this.resultPanel.addComponent(UIOpacity);
+        }
+        // 1. 设置初始状态：完全透明，缩放为0
+        this.resultPanel.setScale(Vec3.ZERO); // Vec3.ZERO 就是 (0, 0, 0)
+        uiOpacity.opacity = 0;
+        // 2. 创建并执行动画
+        // 让 scale 和 opacity 动画并行执行
+        tween(this.resultPanel)
+            .to(0.5, { scale: Vec3.ONE }, { easing: 'cubicOut' }) // 在0.5秒内，缩放到 (1, 1, 1)，使用 cubicOut 缓动效果
+            .start();
+
+        tween(uiOpacity)
+            .to(0.5, { opacity: 255 }, { easing: 'cubicOut' }) // 在0.5秒内，渐变到完全不透明
+            .start();
+    }
+
+    clickRoundResult() {// 点击事件，计算局结果
+        director.loadScene("scenes/WindSelectScene", () => {// 回到选风页面
+            eventBus.emit(EVENT_ROUND_CAL)// 呼叫局结算
+        })
     }
 }
