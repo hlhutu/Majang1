@@ -128,7 +128,12 @@ export class RoundController {
             eventBus.emit(EVENT_LIUJU)
             return
         }
-        runtime.newCard = runtime.deck.pop()!;
+        if(!fromGang) {
+            runtime.newCard = runtime.deck.pop()!;
+        }else {
+            runtime.newCard = runtime.deck.shift()!;// 开杠从尾部抽牌
+        }
+        
         this.handSort();// 先排序
         this.checkGangs([...runtime.hand, runtime.newCard]);// 抽牌后判断是否可以开杠
         this.checkYaku(); // 摸牌后检查役种

@@ -66,6 +66,7 @@ export class RoundView extends Component {
     private deckLabel: Node = null;
     private stageLabel: Node = null;
     private allTileNodes: Node[] = [];// 记录所有牌
+    private oldCanplay: boolean;// 原本是否可以打出
 
     onLoad() {
         this.handsNode = this.handArea.getChildByName("Hands");
@@ -299,10 +300,13 @@ ${runtime.currentPoint}/${runtime.targetPoint}`
     }
 
     clickOpenHelp() {
+        this.oldCanplay = runtime.canPlay; // 记录原本是否可以打出
+        runtime.canPlay = false;// 变为无法打出
         this.helpPanel.active = true;
     }
 
     clickCloseHelp() {
+        runtime.canPlay = this.oldCanplay; // 变回到原本的状态
         this.helpPanel.active = false;
     }
 }
