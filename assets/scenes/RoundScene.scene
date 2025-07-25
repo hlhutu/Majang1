@@ -3791,7 +3791,7 @@
     "__prefab": null,
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 93.55281127391932,
+      "width": 93.55407678574981,
       "height": 29.2
     },
     "_anchorPoint": {
@@ -3824,7 +3824,7 @@
     "_string": "1 x 99 = 99",
     "_horizontalAlign": 2,
     "_verticalAlign": 0,
-    "_actualFontSize": 20.953846153846154,
+    "_actualFontSize": 27.184615384615384,
     "_fontSize": 18,
     "_fontFamily": "Arial",
     "_lineHeight": 20,
@@ -3923,7 +3923,7 @@
     "__prefab": null,
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 69.79250016401517,
+      "width": 69.8012669924362,
       "height": 29.2
     },
     "_anchorPoint": {
@@ -3956,7 +3956,7 @@
     "_string": "Plays: 10",
     "_horizontalAlign": 2,
     "_verticalAlign": 0,
-    "_actualFontSize": 18.625641025641027,
+    "_actualFontSize": 24.164102564102564,
     "_fontSize": 16,
     "_fontFamily": "Arial",
     "_lineHeight": 20,
@@ -4055,7 +4055,7 @@
     "__prefab": null,
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 107.148321748305,
+      "width": 107.16209051524035,
       "height": 29.2
     },
     "_anchorPoint": {
@@ -4088,7 +4088,7 @@
     "_string": "Deck: 136/136",
     "_horizontalAlign": 2,
     "_verticalAlign": 0,
-    "_actualFontSize": 18.625641025641027,
+    "_actualFontSize": 24.164102564102564,
     "_fontSize": 16,
     "_fontFamily": "Arial",
     "_lineHeight": 20,
@@ -4187,8 +4187,8 @@
     "__prefab": null,
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 70.71408128108222,
-      "height": 58.23999999999999
+      "width": 70.72299396404792,
+      "height": 58.239999999999995
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -4220,7 +4220,7 @@
     "_string": "1-東\n100/1000",
     "_horizontalAlign": 0,
     "_verticalAlign": 0,
-    "_actualFontSize": 18.625641025641027,
+    "_actualFontSize": 24.164102564102564,
     "_fontSize": 16,
     "_fontFamily": "Arial",
     "_lineHeight": 24,
@@ -4925,7 +4925,7 @@
     "_string": "继续（+99）",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 29,
+    "_actualFontSize": 26,
     "_fontSize": 20,
     "_fontFamily": "Arial",
     "_lineHeight": 30,
@@ -5198,7 +5198,7 @@
         "__id__": 219
       }
     ],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 227
@@ -5388,7 +5388,7 @@
     "_string": "继续（+99）",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 23,
+    "_actualFontSize": 26,
     "_fontSize": 20,
     "_fontFamily": "Arial",
     "_lineHeight": 30,
@@ -5667,7 +5667,7 @@
         "__id__": 301
       }
     ],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 412
@@ -6185,7 +6185,7 @@
     "__prefab": null,
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 43.99647367368185,
+      "width": 43.99766150186228,
       "height": 54.4
     },
     "_anchorPoint": {
@@ -6218,7 +6218,7 @@
     "_string": "一番",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 23.282051282051285,
+    "_actualFontSize": 26.46153846153846,
     "_fontSize": 20,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
@@ -6599,7 +6599,7 @@
     "__prefab": null,
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 43.99647367368185,
+      "width": 43.99766150186228,
       "height": 54.4
     },
     "_anchorPoint": {
@@ -6632,7 +6632,7 @@
     "_string": "二番",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 23.282051282051285,
+    "_actualFontSize": 26.46153846153846,
     "_fontSize": 20,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
@@ -7013,7 +7013,7 @@
     "__prefab": null,
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 43.99647367368185,
+      "width": 43.99766150186228,
       "height": 54.4
     },
     "_anchorPoint": {
@@ -7046,7 +7046,7 @@
     "_string": "三番",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 23.282051282051285,
+    "_actualFontSize": 26.46153846153846,
     "_fontSize": 20,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
@@ -7427,7 +7427,7 @@
     "__prefab": null,
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 43.99647367368185,
+      "width": 43.99766150186228,
       "height": 54.4
     },
     "_anchorPoint": {
@@ -7460,7 +7460,7 @@
     "_string": "六番",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 23.282051282051285,
+    "_actualFontSize": 26.46153846153846,
     "_fontSize": 20,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
@@ -7841,7 +7841,7 @@
     "__prefab": null,
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 43.99647367368185,
+      "width": 43.99766150186228,
       "height": 54.4
     },
     "_anchorPoint": {
@@ -7874,7 +7874,7 @@
     "_string": "十番",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 23.282051282051285,
+    "_actualFontSize": 26.46153846153846,
     "_fontSize": 20,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
@@ -8255,7 +8255,7 @@
     "__prefab": null,
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 63.99471051052278,
+      "width": 63.99649225279342,
       "height": 54.4
     },
     "_anchorPoint": {
@@ -8288,7 +8288,7 @@
     "_string": "二十番",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 23.282051282051285,
+    "_actualFontSize": 26.46153846153846,
     "_fontSize": 20,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
@@ -8917,7 +8917,7 @@
     "_string": "斷么九：没有任何幺九牌（一饼、一条、一万、九饼、九条、九万、所有风牌和三元牌）。",
     "_horizontalAlign": 0,
     "_verticalAlign": 1,
-    "_actualFontSize": 18.625641025641027,
+    "_actualFontSize": 21.16923076923077,
     "_fontSize": 16,
     "_fontFamily": "Arial",
     "_lineHeight": 30,
@@ -9561,7 +9561,7 @@
     "_string": "斷么九：没有任何幺九牌（一饼、一条、一万、九饼、九条、九万、所有风牌和三元牌）。",
     "_horizontalAlign": 0,
     "_verticalAlign": 1,
-    "_actualFontSize": 18.625641025641027,
+    "_actualFontSize": 21.16923076923077,
     "_fontSize": 16,
     "_fontFamily": "Arial",
     "_lineHeight": 30,
@@ -10205,7 +10205,7 @@
     "_string": "斷么九：没有任何幺九牌（一饼、一条、一万、九饼、九条、九万、所有风牌和三元牌）。",
     "_horizontalAlign": 0,
     "_verticalAlign": 1,
-    "_actualFontSize": 18.625641025641027,
+    "_actualFontSize": 21.16923076923077,
     "_fontSize": 16,
     "_fontFamily": "Arial",
     "_lineHeight": 30,
@@ -10849,7 +10849,7 @@
     "_string": "斷么九：没有任何幺九牌（一饼、一条、一万、九饼、九条、九万、所有风牌和三元牌）。",
     "_horizontalAlign": 0,
     "_verticalAlign": 1,
-    "_actualFontSize": 18.625641025641027,
+    "_actualFontSize": 21.16923076923077,
     "_fontSize": 16,
     "_fontFamily": "Arial",
     "_lineHeight": 30,
@@ -11493,7 +11493,7 @@
     "_string": "斷么九：没有任何幺九牌（一饼、一条、一万、九饼、九条、九万、所有风牌和三元牌）。",
     "_horizontalAlign": 0,
     "_verticalAlign": 1,
-    "_actualFontSize": 18.625641025641027,
+    "_actualFontSize": 21.16923076923077,
     "_fontSize": 16,
     "_fontFamily": "Arial",
     "_lineHeight": 30,

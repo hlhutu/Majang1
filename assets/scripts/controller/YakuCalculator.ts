@@ -1,6 +1,8 @@
 import {MahjongData} from "db://assets/scripts/model/MahjongData";
 import {Global} from "db://assets/scripts/data/Global";
 import {GameResult, HandDecomposition, YakuResult} from "db://assets/scripts/model/GameResult";
+import {Calculator} from "db://assets/scripts/controller/calculators/Calculator";
+import {CalculatorFor1} from "db://assets/scripts/controller/calculators/CalculatorFor1";
 
 /**
  * 将麻将牌对象转换为一个可排序、可比较的数值。
@@ -25,8 +27,8 @@ export class YakuCalculator {
 
     public static calculate(
         gangs: MahjongData[][],
-        hand: MahjongData[],
-        winningTile: MahjongData,
+        hands: MahjongData[],
+        winningTile: MahjongData,// 抽到的牌
         seatWind: number,// 自风，即自己所在位置的风牌
         prevalentWind: number,// 当前场风 1234=东南西北
         isRinshan: boolean,// 是否岭上开花，即是否刚才杠过
@@ -39,43 +41,15 @@ export class YakuCalculator {
         isHaitei: boolean = false,// 是否海底摸鱼
         isHoutei: boolean = false// 是否河底捞月
     ): GameResult {
-
-        const flattenedGangs = gangs.reduce((acc, val) => acc.concat(val), []);
-        const allTiles = [...hand, ...flattenedGangs];
-        const handNums = hand.map(tileToNumber).sort((a, b) => a - b);
-
-        const decomposition = this.findWinningDecomposition(handNums);
-
-        if (!decomposition) {
+        // 先判断能不能和
+        const decomposition = Calculator.ifWin(gangs, hands, winningTile);
+        if (!decomposition) {// 不能和，直接返回
             return { ifWin: false, sumHan: 0, yakus: [] };
         }
-
-        const yakus: YakuResult[] = [];
-
-        // --- 1翻役种 ---
-        if(isRiichi) yakus.push({ name: "立直", han: 1 });
-        if(isIppatsu) yakus.push({ name: "一发", han: 1 });
-        if(isRinshan) yakus.push({ name: "岭上开花", han: 1 });
-        if(isChankan) yakus.push({ name: "枪杠", han: 1 });
-        if(isHaitei) yakus.push({ name: "海底摸月", han: 1 });
-        if(isHoutei) yakus.push({ name: "河底捞鱼", han: 1 });
-
-        const menzenTsumo = this.checkMenzenTsumo(isMenzen, isTsumo);
-        if(menzenTsumo) yakus.push(menzenTsumo);
-
-        const tanyao = this.checkTanyao(allTiles);
-        if(tanyao) yakus.push(tanyao);
-
-        const yakuhai = this.checkYakuhai(allTiles, prevalentWind, seatWind);
-        yakus.push(...yakuhai);
-
-        if (isMenzen) {
-            const pinfu = this.checkPinfu(decomposition, winningTile, prevalentWind, seatWind);
-            if(pinfu) yakus.push(pinfu);
-
-            const iipeikou = this.checkIipeikou(decomposition);
-            if (iipeikou) yakus.push(iipeikou);
-        }
+        const yakus: YakuResult[] = [];// 役种结果
+        // 可以和，开始计算番数
+        // 1番役种 役牌
+        decomposition === 1 && yakus.push(...CalculatorFor1.checkYakuPai(gangs,hands,winningTile))// 所有役牌，每个1番
 
         const sumHan = yakus.reduce((sum, yaku) => sum + yaku.han, 0);
 

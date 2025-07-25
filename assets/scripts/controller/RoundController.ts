@@ -37,6 +37,7 @@ export class RoundController {
         runtime.initForNewRound();// 新开一局，重置runtime数据
         this.shuffleDeck();// 洗牌
         this.dealHand(13);// 抽13张牌
+        runtime.plays++;// 首次抽牌不减少次数
         this.claimCard();// 首次抽牌
         runtime.canPlay = true;// 变为可以出牌的状态
     }
@@ -92,11 +93,11 @@ export class RoundController {
     private shuffleDeck() {
         runtime.deckCount = runtime.deck.length;// 洗牌前，记录牌的总数
         let i = runtime.deck.length;
-        while (i > 0) {// 洗牌
-            const j = Math.floor(Math.random() * i);
-            i--;
-            [runtime.deck[i], runtime.deck[j]] = [runtime.deck[j], runtime.deck[i]];
-        }
+        // while (i > 0) {// 洗牌
+        //     const j = Math.floor(Math.random() * i);
+        //     i--;
+        //     [runtime.deck[i], runtime.deck[j]] = [runtime.deck[j], runtime.deck[i]];
+        // }
     }
 
     private dealHand(count: number) {
@@ -191,7 +192,7 @@ export class RoundController {
     private checkYaku() {
         runtime.yks = YakuCalculator.calculate(
             runtime.gangs,
-            [...runtime.hand, runtime.newCard],
+            runtime.hand,
             runtime.newCard,
             runtime.selfWind,// 自风
             runtime.prevalentWind,// 场风

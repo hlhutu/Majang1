@@ -86,18 +86,18 @@ export class RoundView extends Component {
         eventBus.on(EVENT_LIUJU, this.onFail, this);
     }
 
-    // onDestroy() {
-    //     console.log("RoundView is being destroyed, removing listeners.");
-    //     // 确保移除的函数和绑定的 this 与注册时完全一致
-    //     eventBus.off(EVENT_ROUND_START, this.onRoundStart, this);
-    //     eventBus.off(EVENT_CLAIM_END, this.redrawAllViews, this);
-    //     eventBus.off(EVENT_PLAY_CARD, this.redrawAllViews, this);
-    //     eventBus.off(EVENT_CARD_HOVER, this.highlightSameTiles, this);
-    //     eventBus.off(EVENT_CARD_HOVER_LEAVE, this.resetAllTilesColor, this);
-    //     eventBus.off(EVENT_HU, this.onHu, this);
-    //     eventBus.off(EVENT_FAIL, this.onFail, this);
-    //     eventBus.off(EVENT_LIUJU, this.onFail, this);
-    // }
+    onDestroy() {
+        console.log("RoundView is being destroyed, removing listeners.");
+        // 确保移除的函数和绑定的 this 与注册时完全一致，否则节点会有错
+        eventBus.off(EVENT_ROUND_START, this.onRoundStart, this);
+        eventBus.off(EVENT_CLAIM_END, this.redrawAllViews, this);
+        eventBus.off(EVENT_PLAY_CARD, this.redrawAllViews, this);
+        eventBus.off(EVENT_CARD_HOVER, this.highlightSameTiles, this);
+        eventBus.off(EVENT_CARD_HOVER_LEAVE, this.resetAllTilesColor, this);
+        eventBus.off(EVENT_HU, this.onHu, this);
+        eventBus.off(EVENT_FAIL, this.onFail, this);
+        eventBus.off(EVENT_LIUJU, this.onFail, this);
+    }
 
     // 将原来的匿名函数逻辑，放到对应的类方法中
     onRoundStart() {
@@ -161,12 +161,17 @@ export class RoundView extends Component {
 
             this.operationArea.addChild(buttonNode)
         })
-        if(runtime.yks.ifWin && runtime.yks.sumHan>0) {// 可以和的
+        if(runtime.yks.ifWin) {// 可以和（包含有役和无役的情况）
             const buttonNode = instantiate(this.huButtonPrefab);
-            // 添加点击事件
-            buttonNode.on(Button.EventType.CLICK, () => {
-                eventBus.emit(EVENT_HU)// 告知和牌事件
-            }, this);
+            if(runtime.sumHan>0) {// 有番数才可以点击
+                buttonNode.getChildByName("Sprite").active = false;
+                buttonNode.on(Button.EventType.CLICK, () => {
+                    eventBus.emit(EVENT_HU)// 告知和牌事件
+                }, this);
+            }else {// 无役的情况
+                buttonNode.getComponent(Sprite).color = new Color('#CCCCCC'); // 设置为灰色表示不可用
+                buttonNode.getChildByName("Sprite").active = true;
+            }
             this.operationArea.addChild(buttonNode)
         }
     }
